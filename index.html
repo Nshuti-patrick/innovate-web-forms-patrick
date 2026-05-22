@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Registration | Innovate Company Ltd</title>
+    <style>
+        /* 
+         * CSS STYLES
+         * Designed to be portable. Can be moved to style.css during Git integration.
+         */
+        :root {
+            --primary: #2563eb; /* Innovate Brand Blue */
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --error: #ef4444;
+            --radius: 6px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header specific to this module */
+        .module-header {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .module-header h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .module-header p { font-size: 0.9rem; opacity: 0.9; }
+
+        /* Layout Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Form Area */
+        .form-area { padding: 2rem; border-right: 1px solid var(--border); }
+        
+        h2 { font-size: 1.1rem; color: var(--secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem; border-bottom: 2px solid var(--bg); padding-bottom: 0.5rem; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+        .form-group { margin-bottom: 1rem; }
+
+        label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text); }
+        
+        input, select {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.95rem;
+            transition: border 0.2s;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+
+        /* Course Selection Cards */
+        .course-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+
+        .course-card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            background: #fff;
+        }
+        
+        .course-card:hover { border-color: #93c5fd; transform: translateY(-1px); }
+        
+        .course-card.selected {
+            background-color: #eff6ff;
+            border-color: var(--primary);
+        }
+
+        .course-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .c-code { font-size: 0.75rem; color: var(--secondary); font-weight: 700; }
+        .c-name { font-weight: 600; font-size: 0.9rem; margin: 4px 0; }
+        .c-credits { font-size: 0.8rem; color: var(--secondary); }
+
+        /* Sidebar / Summary */
+        .summary-area { background-color: #f8fafc; padding: 2rem; display: flex; flex-direction: column; }
+        
+        .summary-box {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            flex-grow: 1;
+        }
+
+        .summary-title { font-weight: 700; margin-bottom: 1rem; display: flex; justify-content: space-between; }
+        .credit-badge { background: var(--secondary); color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; }
+        
+        #selected-courses-list { list-style: none; margin-bottom: 1rem; max-height: 250px; overflow-y: auto; }
+        #selected-courses-list li {
+            display: flex; justify-content: space-between; font-size: 0.9rem; padding: 6px 0; border-bottom: 1px solid #f1f5f9;
+        }
+
+        .total-section { border-top: 2px dashed var(--border); padding-top: 1rem; margin-top: auto; }
+        .total-row { display: flex; justify-content: space-between; font-weight: 700; font-size: 1.1rem; color: var(--primary-dark); margin-bottom: 1rem; }
+
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn:disabled { background: var(--secondary); cursor: not-allowed; opacity: 0.7; }
+
+        /* Feedback Toast */
+        .toast {
+            position: fixed; bottom: 20px; right: 20px;
+            background: #333; color: white;
+            padding: 12px 24px; border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(100px); opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.error { background: var(--error); }
+        .toast.success { background: var(--success); }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="module-header">
+            <h1>Course Registration</h1>
+            <p>Innovate Company Ltd &bull; Student Portal</p>
+        </header>
+
+        <div class="content-grid">
+            <!-- Left Column: Inputs -->
+            <div class="form-area">
+                <form id="courseForm">
+                    <h2>Student Details</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentName">Full Name</label>
+                            <input type="text" id="studentName" placeholder="e.g. Sezerano Alpha" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentID">Student ID</label>
+                            <input type="text" id="studentID" placeholder="e.g. 220012345" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="semester">Semester</label>
+                            <select id="semester">
+                                <option>Fall 2023</option>
+                                <option>Spring 2024</option>
+                                <option>Summer 2024</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="department">Department</label>
+                            <select id="department">
+                                <option>Computer Science</option>
+                                <option>Business</option>
+                                <option>Engineering</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h2>Select Courses (Max 18 Credits)</h2>
+                    <div class="course-list" id="courseList">
+                        <!-- Course Items (Hardcoded for this standalone file) -->
+                        <div class="course-card" onclick="toggleCourse(this, 'CS101', 'Intro to Programming', 3)">
+                            <div class="c-code">CS101</div>
+                            <div class="c-name">Intro to Programming</div>
+                            <div class="c-credits">3 Credits</div>
+                        </div>
+                        <div class="course-card" onclick="toggleCourse(this, 'CS201', 'Data Structures', 4)">
+                            <div class="c-code">CS201</div>
+                            <div class="c-name">Data Structures</div>
+                            <div class="c-credits">4 Credits</div>
+                        </div>
+                        <div class="course-card" onclick="toggleCourse(this, 'MATH101', 'Calculus I', 3)">
+                            <div class="c-code">MATH101</div>
+                            <div class="c-name">Calculus I</div>
+                            <div class="c-credits">3 Credits</div>
+                        </div>
+                        <div class="course-card" onclick="toggleCourse(this, 'ENG102', 'Technical Writing', 2)">
+                            <div class="c-code">ENG102</div>
+                            <div class="c-name">Technical Writing</div>
+                            <div class="c-credits">2 Credits</div>
+                        </div>
+                        <div class="course-card" onclick="toggleCourse(this, 'PHY101', 'Applied Physics', 4)">
+                            <div class="c-code">PHY101</div>
+                            <div class="c-name">Applied Physics</div>
+                            <div class="c-credits">4 Credits</div>
+                        </div>
+                        <div class="course-card" onclick="toggleCourse(this, 'BUS101', 'Microeconomics', 3)">
+                            <div class="c-code">BUS101</div>
+                            <div class="c-name">Microeconomics</div>
+                            <div class="c-credits">3 Credits</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Right Column: Summary -->
+            <div class="summary-area">
+                <div class="summary-box">
+                    <div class="summary-title">
+                        <span>Selected Courses</span>
+                        <span class="credit-badge"><span id="currentCredits">0</span> / 18 Cr</span>
+                    </div>
+                    
+                    <div id="empty-msg" style="text-align: center; color: #999; font-size: 0.9rem; padding: 20px 0;">
+                        No courses selected.
+                    </div>
+
+                    <ul id="selected-courses-list">
+                        <!-- JS populates this -->
+                    </ul>
+
+                    <div class="total-section">
+                        <div class="total-row">
+                            <span>Total</span>
+                            <span id="totalCost">$0</span>
+                        </div>
+                        <button class="btn btn-primary" id="registerBtn" disabled onclick="submitRegistration()">Confirm Registration</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast" class="toast">Message here</div>
+
+    <script>
+        /* 
+         * JAVASCRIPT LOGIC
+         * Can be moved to script.js during Git integration.
+         */
+        
+        // State
+        let selectedCourses = [];
+        const MAX_CREDITS = 18;
+        const COST_PER_CREDIT = 50000; // e.g., RWF or generic currency
+
+        // Elements
+        const currentCreditsEl = document.getElementById('currentCredits');
+        const listEl = document.getElementById('selected-courses-list');
+        const totalCostEl = document.getElementById('totalCost');
+        const registerBtn = document.getElementById('registerBtn');
+        const emptyMsg = document.getElementById('empty-msg');
+
+        // Toggle Course Function
+        function toggleCourse(cardElement, code, title, credits) {
+            const index = selectedCourses.findIndex(c => c.code === code);
+
+            if (index > -1) {
+                // Remove if exists
+                selectedCourses.splice(index, 1);
+                cardElement.classList.remove('selected');
+            } else {
+                // Add if doesn't exist
+                // Check credit limit
+                const currentTotal = selectedCourses.reduce((sum, c) => sum + c.credits, 0);
+                if (currentTotal + credits > MAX_CREDITS) {
+                    showToast(`Credit limit reached! Max ${MAX_CREDITS}.`, 'error');
+                    return;
+                }
+                selectedCourses.push({ code, title, credits });
+                cardElement.classList.add('selected');
+            }
+            updateUI();
+        }
+
+        // Update Summary UI
+        function updateUI() {
+            // Calculate Totals
+            const totalCredits = selectedCourses.reduce((sum, c) => sum + c.credits, 0);
+            const totalCost = totalCredits * COST_PER_CREDIT;
+
+            // Update Text
+            currentCreditsEl.innerText = totalCredits;
+            totalCostEl.innerText = totalCost.toLocaleString(); // Format with commas
+
+            // Render List
+            listEl.innerHTML = '';
+            
+            if (selectedCourses.length === 0) {
+                emptyMsg.style.display = 'block';
+                registerBtn.disabled = true;
+            } else {
+                emptyMsg.style.display = 'none';
+                registerBtn.disabled = false;
+
+                selectedCourses.forEach(c => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<span>${c.code}</span> <span>${c.credits} Cr</span>`;
+                    listEl.appendChild(li);
+                });
+            }
+        }
+
+        // Submit Logic
+        function submitRegistration() {
+            const studentName = document.getElementById('studentName').value;
+            const studentID = document.getElementById('studentID').value;
+
+            if(!studentName || !studentID) {
+                showToast("Please enter Student Name and ID.", "error");
+                return;
+            }
+
+            // Simulate API call / Success
+            console.log("Submitting:", { studentName, studentID, courses: selectedCourses });
+            
+            showToast(`Success! ${selectedCourses.length} courses registered for ${studentName}.`, 'success');
+            
+            // Optional: Reset form after delay
+            setTimeout(() => {
+                // Logic to reset could go here
+            }, 3000);
+        }
+
+        // Toast Helper
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
